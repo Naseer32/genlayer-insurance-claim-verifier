@@ -36,3 +36,14 @@ Test pool `pool_0` "Flood Cover Basic": premium 2 GEN, max payout 3 GEN, terms r
 ## Evidence note
 
 The evidence used for claim_2 (`evidence/nowshera_flood_report.txt`) is a test fixture written for this demo, not a real news article. The claim on chain references the raw file URL in the `Naseer32/genlayer-bug-bounty` repository.
+
+## Known limitations and next steps
+
+This is a hackathon prototype. The deployed contract intentionally keeps the logic simple, and these are the known gaps I would close in a v2:
+
+1. **Repeat claims per policy.** A policyholder can file several claims under one policy, each with new evidence, until the pool is drained. The evidence-reuse guard only blocks reusing the same URL. Fix: mark the policy as claimed once a claim is approved.
+2. **Claimant chooses the evidence.** Nothing stops a claimant from hosting their own "news article". Fix: per-pool `trusted_domains` allowlist, plus a prompt instruction that fetched evidence is untrusted data and must never be followed as instructions.
+3. **No way for the insurer to withdraw.** There is no `close_pool` or `withdraw`, so the escrow stays locked. `POOL_CLOSED` exists but is not used yet.
+4. **No waiting period or incident date.** A buyer can purchase a policy and claim immediately. Fix: add a coverage start delay and an incident date check against the evidence.
+
+The demo evidence for claim_2 is a self-written test fixture, which is exactly the weakness described in point 2.

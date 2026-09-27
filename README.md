@@ -4,8 +4,8 @@ A parametric insurance intelligent contract on GenLayer. Insurers fund policy po
 
 ## Deployment (GenLayer Studio)
 
-- Contract: `0x083041CAE1959B912eA3af5e336659E26CB38207`
-- Explorer: https://explorer-studio.genlayer.com/address/0x083041CAE1959B912eA3af5e336659E26CB38207
+- Contract: `0xEA9ed2e60dE54Ec0550840e11dAb36368DFc8793`
+- Explorer: https://explorer-studio.genlayer.com/address/0xEA9ed2e60dE54Ec0550840e11dAb36368DFc8793
 - Source: `contracts/insurance_claim_verifier.py`
 
 ## How it works
@@ -22,16 +22,16 @@ Test pool `pool_0` "Flood Cover Basic": premium 2 GEN, max payout 3 GEN, terms r
 
 | Step | Tx hash |
 |---|---|
-| Deploy | 0xee607c882ef64f0df5a124c384f13aff4a015c9cfcad2d11a5c63989c775623b |
-| create_policy_pool | 0x4f32e6c454d1641a5907fc02ba2903d4a7516b24b28acbc865a900d3b6778ce0 |
-| buy_policy | 0x3a48c38c3bce1369ff3584da0cb76f3854b384b5361f0b47c8f5e7c4bff7faf5 |
-| submit_claim (claim_1) | 0xaafe35a76371e6e23ee3e5dccdf3a03f0ac85df76ea8d4e8d74c5f282d992b99 |
-| resolve_claim (claim_1, DENIED) | 0x3d579569689e1e22b53db9a33c9b1467ecb86e41cc6305b83ffb596f6b79433c |
-| submit_claim (claim_2) | 0x6accef44ccfbc0f46f5496f260f45219a1b0de15219dad6270d5b6ac8ca837ba |
-| resolve_claim (claim_2, APPROVED) | 0x6d2e5dfee0f71c7551b07499624e4bfcd45ef99cd47a1aa01318db6bd3f7d40b |
+| Deploy (v2, deterministic payout) | 0xEA9ed2e60dE54Ec0550840e11dAb36368DFc8793 |
+| create_policy_pool | 0x834d7e2697d1ae0073377b7c28af0cdc2f57d68542add8488c00875e8bb02719 |
+| buy_policy | 0x6f1184e6ff295759a74b2b9e40325ee9703d67edfb5e2468225b41b967f137e4 |
+| submit_claim (claim_0) | 0xe70e4f1f35d67e4c4b0c5fbd12c79ffd8d8bd4ddd25a706c1c2c3d8b4dca9fe9 |
+| resolve_claim (claim_0, DENIED) | 0x620d82d4a3f12a7205ee0c9bd873ff04db0e858a671538b93085243f151d8af8 |
+| submit_claim (claim_1) | 0x05f7b0815b26e3b1a0b1e3e5c887ba860c4b4cae5367edbf5f1df0a18cf249e1 |
+| resolve_claim (claim_1, APPROVED) | 0xf15429fec615baa55a0869e7ea66d37eccf7f8ec71ad87806b7a880d683f7fc2 |
 
-- claim_1: the evidence showed general flooding in Pakistan but no damage at the insured property, so validators denied it (payout 0).
-- claim_2: the evidence named the insured property directly, validators approved 100% and 3 GEN was paid out. Pool balance went from 7 GEN to 4 GEN.
+- claim_0: the evidence showed general flooding in Pakistan but no damage at the insured property, so validators denied it (payout 0).
+- claim_1: the evidence named the insured property directly, validators approved 100% and 3 GEN was paid out. Pool balance went from 7 GEN to 4 GEN.
 
 ## Evidence note
 
@@ -40,6 +40,8 @@ The evidence used for claim_2 (`evidence/nowshera_flood_report.txt`) is a test f
 ## Known limitations and next steps
 
 This is a hackathon prototype. The deployed contract intentionally keeps the logic simple, and these are the known gaps I would close in a v2:
+
+**Update (fixed):** payout_fraction was previously allowed to differ by up to 10 points between validators even though it set the exact escrow transfer amount. It is now constrained to one of {0, 25, 50, 75, 100} with an exact-match equivalence rule and a snap-to-nearest-tier fallback, so every validator-compatible run produces the same payout. This was flagged by a GenLayer Portal reviewer and fixed before resubmission.
 
 1. **Repeat claims per policy.** A policyholder can file several claims under one policy, each with new evidence, until the pool is drained. The evidence-reuse guard only blocks reusing the same URL. Fix: mark the policy as claimed once a claim is approved.
 2. **Claimant chooses the evidence.** Nothing stops a claimant from hosting their own "news article". Fix: per-pool `trusted_domains` allowlist, plus a prompt instruction that fetched evidence is untrusted data and must never be followed as instructions.
